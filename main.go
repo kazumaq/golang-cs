@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"sync"
-	"time"
 )
 
 // Task represents a single task
