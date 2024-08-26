@@ -1,5 +1,16 @@
 # Go Language Cheat Sheet
 
+## Table of Contents
+1. [String Manipulation](#string-manipulation)
+2. [Heap (Min and Max)](#heap-min-and-max)
+3. [Math Operations](#math-operations)
+4. [Sorting](#sorting)
+5. [Binary Search](#binary-search)
+6. [BFS Traversal](#bfs-traversal)
+7. [Dynamic Programming](#dynamic-programming)
+8. [For Loops](#for-loops)
+9. [Operations Missing from Go's Standard Library](#operations-missing-from-gos-standard-library)
+
 ## String Manipulation
 
 ```go
@@ -225,3 +236,375 @@ The sorting algorithm used internally by Go's `sort` package is a hybrid algorit
 3. It also uses heapsort as a fallback to guarantee O(n log n) worst-case complexity.
 
 This hybrid approach combines the average-case efficiency of quicksort with the good performance of insertion sort on small slices and the worst-case guarantee of heapsort.
+
+## Binary Search
+
+Binary search is an efficient algorithm for searching a sorted array by repeatedly dividing the search interval in half.
+
+```go
+import (
+    "fmt"
+)
+
+// Iterative Binary Search
+func binarySearch(arr []int, target int) int {
+    left, right := 0, len(arr)-1
+
+    for left <= right {
+        mid := left + (right-left)/2
+        if arr[mid] == target {
+            return mid
+        } else if arr[mid] < target {
+            left = mid + 1
+        } else {
+            right = mid - 1
+        }
+    }
+
+    return -1 // Not found
+}
+
+// Recursive Binary Search
+func binarySearchRecursive(arr []int, target, left, right int) int {
+    if left > right {
+        return -1 // Not found
+    }
+
+    mid := left + (right-left)/2
+    if arr[mid] == target {
+        return mid
+    } else if arr[mid] < target {
+        return binarySearchRecursive(arr, target, mid+1, right)
+    } else {
+        return binarySearchRecursive(arr, target, left, mid-1)
+    }
+}
+
+// Usage
+func main() {
+    arr := []int{1, 3, 5, 7, 9, 11, 13, 15}
+    target := 7
+
+    // Iterative
+    result := binarySearch(arr, target)
+    fmt.Printf("Iterative: Element found at index: %d\n", result)
+
+    // Recursive
+    result = binarySearchRecursive(arr, target, 0, len(arr)-1)
+    fmt.Printf("Recursive: Element found at index: %d\n", result)
+}
+```
+
+## BFS Traversal
+
+Breadth-First Search (BFS) is an algorithm for traversing or searching tree or graph data structures.
+
+```go
+import (
+    "fmt"
+)
+
+// Graph represented as an adjacency list
+type Graph struct {
+    vertices int
+    adjList  map[int][]int
+}
+
+func NewGraph(vertices int) *Graph {
+    return &Graph{
+        vertices: vertices,
+        adjList:  make(map[int][]int),
+    }
+}
+
+func (g *Graph) AddEdge(v, w int) {
+    g.adjList[v] = append(g.adjList[v], w)
+    g.adjList[w] = append(g.adjList[w], v)
+}
+
+func (g *Graph) BFS(start int) {
+    visited := make(map[int]bool)
+    queue := []int{start}
+
+    for len(queue) > 0 {
+        vertex := queue[0]
+        queue = queue[1:]
+
+        if !visited[vertex] {
+            visited[vertex] = true
+            fmt.Printf("%d ", vertex)
+
+            for _, neighbor := range g.adjList[vertex] {
+                if !visited[neighbor] {
+                    queue = append(queue, neighbor)
+                }
+            }
+        }
+    }
+}
+
+// Usage
+func main() {
+    g := NewGraph(4)
+    g.AddEdge(0, 1)
+    g.AddEdge(0, 2)
+    g.AddEdge(1, 2)
+    g.AddEdge(2, 3)
+
+    fmt.Println("BFS traversal starting from vertex 0:")
+    g.BFS(0)
+}
+```
+
+## Dynamic Programming
+
+Dynamic Programming (DP) is a method for solving complex problems by breaking them down into simpler subproblems. Here's an example of solving the Fibonacci sequence using DP.
+
+```go
+import (
+    "fmt"
+)
+
+// Recursive Fibonacci (inefficient)
+func fibRecursive(n int) int {
+    if n <= 1 {
+        return n
+    }
+    return fibRecursive(n-1) + fibRecursive(n-2)
+}
+
+// Dynamic Programming: Top-down approach (Memoization)
+func fibMemo(n int, memo map[int]int) int {
+    if n <= 1 {
+        return n
+    }
+    if val, exists := memo[n]; exists {
+        return val
+    }
+    memo[n] = fibMemo(n-1, memo) + fibMemo(n-2, memo)
+    return memo[n]
+}
+
+// Dynamic Programming: Bottom-up approach (Tabulation)
+func fibDP(n int) int {
+    if n <= 1 {
+        return n
+    }
+    dp := make([]int, n+1)
+    dp[0], dp[1] = 0, 1
+    for i := 2; i <= n; i++ {
+        dp[i] = dp[i-1] + dp[i-2]
+    }
+    return dp[n]
+}
+
+// Usage
+func main() {
+    n := 10
+
+    fmt.Printf("Recursive Fibonacci(%d) = %d\n", n, fibRecursive(n))
+
+    memo := make(map[int]int)
+    fmt.Printf("Memoized Fibonacci(%d) = %d\n", n, fibMemo(n, memo))
+
+    fmt.Printf("DP Fibonacci(%d) = %d\n", n, fibDP(n))
+}
+```
+
+This example demonstrates three approaches to solving the Fibonacci sequence:
+1. Recursive (inefficient for large n)
+2. Top-down DP with memoization
+3. Bottom-up DP with tabulation
+
+Dynamic Programming is crucial in solving many optimization problems efficiently, especially in competitive programming scenarios.
+
+## For Loops
+
+Go's `for` loop is versatile and can be used in various ways. Here are common patterns and use cases:
+
+```go
+import (
+    "fmt"
+)
+
+func main() {
+    // Basic for loop
+    for i := 0; i < 5; i++ {
+        fmt.Println(i)
+    }
+
+    // While-like loop
+    j := 0
+    for j < 5 {
+        fmt.Println(j)
+        j++
+    }
+
+    // Infinite loop
+    k := 0
+    for {
+        fmt.Println(k)
+        k++
+        if k >= 5 {
+            break
+        }
+    }
+
+    // Iterating over a slice or array
+    numbers := []int{1, 2, 3, 4, 5}
+    for index, value := range numbers {
+        fmt.Printf("Index: %d, Value: %d\n", index, value)
+    }
+
+    // Iterating over a map
+    scores := map[string]int{"Alice": 95, "Bob": 80, "Charlie": 90}
+    for key, value := range scores {
+        fmt.Printf("%s scored %d\n", key, value)
+    }
+
+    // Iterating in reverse
+    for i := 10; i > 0; i-- {
+        fmt.Println(i)
+    }
+
+    // Loop with multiple variables
+    for i, j := 0, 10; i < j; i, j = i+1, j-1 {
+        fmt.Printf("i = %d, j = %d\n", i, j)
+    }
+
+    // Loop with continue
+    for i := 0; i < 10; i++ {
+        if i%2 == 0 {
+            continue // Skip even numbers
+        }
+        fmt.Println(i)
+    }
+}
+```
+
+Key points about for loops in Go:
+
+1. Go has only one looping construct: the `for` loop.
+2. The basic `for` loop has three components: init statement, condition expression, and post statement.
+3. The init and post statements are optional.
+4. You can use `break` to exit a loop early and `continue` to skip to the next iteration.
+5. The `range` form of the for loop iterates over slices, arrays, maps, strings, and channels.
+6. You can create infinite loops using `for {}` or `for true {}`.
+7. Go doesn't have a do-while loop, but you can simulate it using a for loop with a break statement.
+8. Labels can be used with `break` and `continue` to control outer loops from within nested loops.
+
+Remember that in Go, there are no parentheses surrounding the three components of the for statement, but the braces `{ }` are required.
+
+## Operations Missing from Go's Standard Library
+
+Go's standard library is designed to be minimal and focused. As a result, some operations that are commonly found in other languages' standard libraries are not included in Go. Here are some examples and how to work around them:
+
+1. Set Data Structure
+   - Go doesn't have a built-in Set type.
+   - Workaround: Use a map with bool values.
+
+   ```go
+   set := make(map[string]bool)
+   set["item"] = true
+   if set["item"] {
+       fmt.Println("Item exists")
+   }
+   ```
+
+2. Optional/Nullable Types
+   - Go doesn't have built-in optional types like Some languages (e.g., Rust's Option or Scala's Option).
+   - Workaround: Use pointers or a custom struct.
+
+   ```go
+   type Optional struct {
+       value int
+       isSet bool
+   }
+   ```
+
+3. Ternary Operator
+   - Go doesn't have a ternary operator (?:).
+   - Workaround: Use an if-else statement.
+
+   ```go
+   result := ""
+   if condition {
+       result = "true"
+   } else {
+       result = "false"
+   }
+   ```
+
+4. Generic Max/Min Functions
+   - Go doesn't have generic max/min functions in its standard library.
+   - Workaround: Write your own function or use math.Max/Min for float64.
+
+   ```go
+   func Max(x, y int) int {
+       if x > y {
+           return x
+       }
+       return y
+   }
+   ```
+
+5. String Joining with Separator
+   - While Go has strings.Join, it doesn't have a direct equivalent to Python's " ".join(list).
+   - Workaround: Use strings.Join with a slice.
+
+   ```go
+   words := []string{"Hello", "World"}
+   sentence := strings.Join(words, " ")
+   ```
+
+6. String Multiplication
+   - Go doesn't have a string multiplication operator like Python's "*".
+   - Workaround: Use strings.Repeat.
+
+   ```go
+   repeatedString := strings.Repeat("Go", 3)  // "GoGoGo"
+   ```
+
+7. Built-in List Comprehensions
+   - Go doesn't have list comprehensions like Python.
+   - Workaround: Use a for loop or create a helper function.
+
+   ```go
+   squares := make([]int, 10)
+   for i := range squares {
+       squares[i] = i * i
+   }
+   ```
+
+8. Built-in Functional Programming Operations
+   - Go doesn't have built-in map, filter, or reduce functions.
+   - Workaround: Write your own functions or use a third-party library.
+
+   ```go
+   // Simple map function
+   func Map(vs []int, f func(int) int) []int {
+       vsm := make([]int, len(vs))
+       for i, v := range vs {
+           vsm[i] = f(v)
+       }
+       return vsm
+   }
+   ```
+
+9. Complex Number Type
+   - While Go does have a complex number type, it lacks some operations found in languages like Python.
+   - Workaround: Use the math/cmplx package for additional operations.
+
+   ```go
+   c := complex(3, 4)
+   abs := cmplx.Abs(c)
+   ```
+
+10. Date Parsing and Formatting
+    - Go's time parsing and formatting is different from many other languages.
+    - Workaround: Use the specific layout string required by Go.
+
+    ```go
+    const layout = "2006-01-02"
+    date, _ := time.Parse(layout, "2023-05-15")
+    ```
